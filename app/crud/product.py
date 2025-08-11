@@ -1,11 +1,15 @@
 from typing import Dict, List, Optional
 from app.models.category import CategoriesOrm
 from sqlalchemy import Integer, and_, cast, func, insert, inspect, or_, select, text
-from sqlalchemy.orm import aliased, contains_eager, joinedload, selectinload
+from sqlalchemy.orm import joinedload, selectinload
 from app.db.session import async_session_factory
 from app.models.product import ProductsOrm
 from app.schemas.product import ProductResponse
 from sqlalchemy.ext.asyncio import AsyncSession
+from typing import Annotated, Optional
+from decimal import Decimal
+from pydantic import Field
+
 
 class ProductsService:
 
@@ -14,12 +18,25 @@ class ProductsService:
             result = await session.execute(select(ProductsOrm).options(joinedload(ProductsOrm.category)))
             products = result.scalars().all()
             return [ProductResponse.model_validate(p, from_attributes=True) for p in products]  
-
-        
-
+    
     @staticmethod
-    async def insert_product(session: AsyncSession, name: str, category_id: int, description: Optional[str] = None) -> ProductResponse:
-        product = ProductsOrm(name=name, description=description, category_id=category_id)
+    async def insert_product(
+            session: AsyncSession,
+            name: str,
+            category_id: int,
+            price: Decimal,
+            is_active: bool,
+            stock_quantity: int,
+            description: Optional[str] = None
+        ) -> ProductResponse:
+        product = ProductsOrm(
+            name=name,
+            description=description,
+            category_id=category_id,
+            price=price,
+            is_active=is_active,
+            stock_quantity=stock_quantity
+            )
         session.add(product)
         await session.commit()
         await session.refresh(product)
@@ -33,8 +50,7 @@ class ProductsService:
         await session.delete(product)
         await session.commit()
         return True
-    
-    
+
     @staticmethod
     async def update_product_by_id(
         session: AsyncSession,
@@ -42,6 +58,9 @@ class ProductsService:
         name: Optional[str] = None,
         description: Optional[str] = None,
         category_id: Optional[int] = None,
+        price: Optional[Decimal] = None,
+        is_active: Optional[bool] = None,
+        stock_quantity: Optional[int] = None
     ):
                 product = await session.get(ProductsOrm, product_id)
                 if not product:
@@ -55,12 +74,17 @@ class ProductsService:
                         if not category:
                             raise ValueError(f"Категорія з ID {category_id} не існує")
                         product.category_id = category_id
+                if price is not None:
+                    product.price = price
+                if is_active is not None:
+                    product.is_active = is_active
+                if stock_quantity is not None:
+                    product.stock_quantity = stock_quantity
                 await session.flush()
                 await session.commit()
                 await session.refresh(product) 
                 return ProductResponse.model_validate(product, from_attributes=True)
             
-         
     @staticmethod
     async def get_product_by_id(product_id: int, session: AsyncSession,) -> Optional[Dict]:
             result = await session.execute(

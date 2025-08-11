@@ -42,8 +42,11 @@ async def insert_product_api(
         new_product = await ProductsService.insert_product(
             session=session,
             name=product.name,
+            description=product.description,
             category_id=product.category_id,
-            description=product.description
+            price=product.price,
+            is_active=product.is_active,
+            stock_quantity=product.stock_quantity
         )
         return new_product
     except Exception as e:
@@ -84,11 +87,13 @@ async def update_product(
         name=product_data.name,
         description=product_data.description,
         category_id=product_data.category_id,
+        price=product_data.price,
+        is_active=product_data.is_active,
+        stock_quantity=product_data.stock_quantity
     )
     if not updated:
         raise HTTPException(status_code=404, detail="Product not found")
     return updated
-
 
 @product_router.get(
     "/products/{product_id}",

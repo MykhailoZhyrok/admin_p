@@ -1,22 +1,32 @@
-from pydantic import BaseModel
-from typing import Optional
+from pydantic import BaseModel, Field
+from decimal import Decimal
+from typing import Annotated, Optional
 
 
-class ProductCreate(BaseModel):
+class ProductBase(BaseModel):
     name: str
-    description: str | None = None 
-    category_id: int 
-        
+    description: Optional[str] = None
+    category_id: int
+    price: Annotated[Decimal, Field(max_digits=12, decimal_places=2)]
+    is_active: bool = True
+    stock_quantity: int = 0
+
+
+class ProductCreate(ProductBase):
+    pass
+
+
 class ProductUpdate(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
     category_id: Optional[int] = None
+    price: Annotated[Decimal, Field(max_digits=12, decimal_places=2)]
+    is_active: Optional[bool] = None
+    stock_quantity: Optional[int] = None
 
-class ProductResponse(BaseModel):
+
+class ProductResponse(ProductBase):
     id: int
-    name: str
-    description: Optional[str]
-    category_id: int
 
-
-
+    class Config:
+        orm_mode = True

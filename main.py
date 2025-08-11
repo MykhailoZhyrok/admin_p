@@ -15,7 +15,6 @@ app.include_router(user_router, prefix="/api/v1")
 app.include_router(category_router, prefix="/api/v1")
 app.include_router(product_router, prefix="/api/v1")
 
-
 async def main():
     await create_tables_prod()
     await create_tables_user()
