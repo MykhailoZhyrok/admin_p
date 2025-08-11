@@ -1,0 +1,39 @@
+project/
+│
+├── src/                                # Основна логіка застосунку
+│   ├── main.py                         # Точка входу, створення FastAPI app, роутів
+│   ├── config.py                       # Конфігурації: БД, CORS, env-змінні
+│   │
+│   ├── models/                         # SQLAlchemy моделі
+│   │   ├── __init__.py
+│   │   ├── base.py                     # Base class для моделей
+│   │   ├── category.py                 # Модель категорії
+│   │   └── product.py                  # Модель продукту
+│   │
+│   ├── schemas/                        # Pydantic-схеми (для запитів і відповідей)
+│   │   ├── __init__.py
+│   │   ├── category.py                 # CategoryCreate, CategoryUpdate
+│   │   └── product.py                  # ProductCreate, ProductUpdate
+│   │
+│   ├── crud/                           # Логіка роботи з базою (insert, get, update, delete)
+│   │   ├── __init__.py
+│   │   ├── category.py
+│   │   └── product.py
+│   │
+│   ├── db/                             # Підключення до БД, створення таблиць
+│   │   ├── __init__.py
+│   │   ├── session.py                  # Асинхронна сесія (AsyncSession)
+│   │   └── init_db.py                  # Функція create_tables()
+│   │
+│   ├── api/                            # Роутери для FastAPI
+│   │   ├── __init__.py
+│   │   ├── category.py                 # /category endpoints
+│   │   └── product.py                  # /products endpoints
+│   │
+│   └── queries/                        # Якщо CRUD винесено сюди — AsyncORM
+│       ├── __init__.py
+│       └── orm.py                      # AsyncORM: вставка, оновлення, видалення, отримання
+│
+├── .env                                # ENV-змінні (БД URI, DEBUG тощо)
+├── requirements.txt                    # Залежності проєкту
+└── README.md
