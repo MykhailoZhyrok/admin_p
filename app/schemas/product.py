@@ -2,7 +2,6 @@ from pydantic import BaseModel, Field
 from decimal import Decimal
 from typing import Annotated, Optional
 
-
 class ProductBase(BaseModel):
     name: str
     description: Optional[str] = None
@@ -11,10 +10,8 @@ class ProductBase(BaseModel):
     is_active: bool = True
     stock_quantity: int = 0
 
-
 class ProductCreate(ProductBase):
     pass
-
 
 class ProductUpdate(BaseModel):
     name: Optional[str] = None
@@ -24,9 +21,8 @@ class ProductUpdate(BaseModel):
     is_active: Optional[bool] = None
     stock_quantity: Optional[int] = None
 
-
 class ProductResponse(ProductBase):
     id: int
-
+    
     class Config:
         orm_mode = True
