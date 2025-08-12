@@ -68,15 +68,15 @@ async def update_product(category_id: int, category_data: CategoryUpdate, sessio
             raise HTTPException(status_code=404, detail="Categiry not found")
         return updated
 
-@category_router.get("/category-products/", 
-                    summary="Категорії з товарами",
-                    description="Повертає всі категорії разом з пов’язаними товарами.",
-                    tags=["Категорія"])
-async def get_all_products(session: AsyncSession = Depends(get_prod_session)) -> List[dict]:
-    try:
-        return await CategoryService.get_products_with_category(session)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
+# @category_router.get("/category-products/", 
+#                     summary="Категорії з товарами",
+#                     description="Повертає всі категорії разом з пов’язаними товарами.",
+#                     tags=["Категорія"])
+# async def get_all_products(session: AsyncSession = Depends(get_prod_session)) -> List[dict]:
+#     try:
+#         return await CategoryService.get_products_with_category(session)
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
     
 
 @category_router.get("/category/{category_id}", 

@@ -40,7 +40,7 @@ class CategoryService:
         category_id: int,
         name: Optional[str] = None,
         description: Optional[str] = None, 
-       
+
     ):
         category  = await session.get(CategoriesOrm, category_id)
         if not category:
@@ -63,7 +63,7 @@ class CategoryService:
                 select(ProductsOrm)
                 .where(ProductsOrm.category_id == category_id)
                 .options(selectinload(ProductsOrm.category))
-           
+
             )
             products = result.scalars().all()
             return [
@@ -81,4 +81,4 @@ class CategoryService:
                 for product in products
             ]
     
-  
+

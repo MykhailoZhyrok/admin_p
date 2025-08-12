@@ -1,6 +1,9 @@
+from datetime import datetime
 from pydantic import BaseModel, Field
 from decimal import Decimal
 from typing import Annotated, Optional
+
+
 
 class ProductBase(BaseModel):
     name: str
@@ -23,6 +26,8 @@ class ProductUpdate(BaseModel):
 
 class ProductResponse(ProductBase):
     id: int
-    
+    image_path: Optional[str] = None 
+    created_at: datetime
+    updated_at: datetime
     class Config:
         orm_mode = True

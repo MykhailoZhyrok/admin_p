@@ -1,4 +1,6 @@
 from typing import Dict, List, Optional
+
+from pathlib import Path 
 from app.models.category import CategoriesOrm
 from sqlalchemy import Integer, and_, cast, func, insert, inspect, or_, select, text
 from sqlalchemy.orm import joinedload, selectinload
@@ -27,7 +29,8 @@ class ProductsService:
             price: Decimal,
             is_active: bool,
             stock_quantity: int,
-            description: Optional[str] = None
+            description: Optional[str] = None,
+            image_path: Optional[str] = None
         ) -> ProductResponse:
         product = ProductsOrm(
             name=name,
@@ -35,7 +38,8 @@ class ProductsService:
             category_id=category_id,
             price=price,
             is_active=is_active,
-            stock_quantity=stock_quantity
+            stock_quantity=stock_quantity,
+            image_path=image_path
             )
         session.add(product)
         await session.commit()
@@ -47,6 +51,13 @@ class ProductsService:
         product = await session.get(ProductsOrm, product_id)
         if not product:
             return False
+        if product.image_path:
+            file_path = Path("." + product.image_path)  
+        if file_path.exists():
+            try:
+                file_path.unlink()
+            except Exception as e:
+                print(f"Не вдалося видалити файл {file_path}: {e}")
         await session.delete(product)
         await session.commit()
         return True
@@ -60,7 +71,8 @@ class ProductsService:
         category_id: Optional[int] = None,
         price: Optional[Decimal] = None,
         is_active: Optional[bool] = None,
-        stock_quantity: Optional[int] = None
+        stock_quantity: Optional[int] = None,
+        image_path: Optional[str] = None
     ):
                 product = await session.get(ProductsOrm, product_id)
                 if not product:
@@ -80,6 +92,15 @@ class ProductsService:
                     product.is_active = is_active
                 if stock_quantity is not None:
                     product.stock_quantity = stock_quantity
+                if image_path is not None:
+                    if product.image_path:
+                        file_path = Path("." + product.image_path)  
+                    if file_path.exists():
+                        try:
+                            file_path.unlink()
+                        except Exception as e:
+                            print(f"Не вдалося видалити файл {file_path}: {e}")
+                    product.image_path=image_path
                 await session.flush()
                 await session.commit()
                 await session.refresh(product) 
