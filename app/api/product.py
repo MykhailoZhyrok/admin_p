@@ -2,7 +2,7 @@ from decimal import Decimal
 from typing import Annotated, List, Optional
 from fastapi import File, Form, UploadFile, APIRouter, HTTPException, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.schemas.product import ProductResponse, ProductCreate, ProductUpdate
+from app.schemas.product import ProductData, ProductFormData, ProductResponse
 from app.crud.product import ProductsService
 from app.db.session import get_prod_session
 from app.models.user import UsersOrm
@@ -36,27 +36,19 @@ async def get_products(session: AsyncSession = Depends(get_prod_session)):
     tags=["Продукт"]
 )
 async def insert_product_api(
-    name: str = Form(...),
-    description: Optional[str] = Form(None),
-    category_id: int = Form(...),
-    price: Decimal = Form(...),
-    is_active: bool = Form(True),
-    stock_quantity: int = Form(0),
-    file: UploadFile = File(...),
+    form_data_and_file: ProductFormData = Depends(ProductFormData.as_form),
     session: AsyncSession = Depends(get_prod_session),
-    _: UsersOrm = Depends(get_current_user)
+    # _: UsersOrm = Depends(get_current_user)
 ):
     try:
-        image_path = await uploaderImg(file)
+        image_path = await uploaderImg(form_data_and_file.file)
+
+        data_dict = form_data_and_file.model_dump(exclude={"file"})
+        data_dict["image_path"] = image_path
+
         new_product = await ProductsService.insert_product(
             session=session,
-            name=name,
-            description = description,
-            category_id=category_id,
-            price=price,
-            is_active=is_active,
-            stock_quantity=stock_quantity,
-            image_path=image_path
+            data = ProductData(**data_dict)
         )
         return new_product
     except Exception as e:
@@ -88,31 +80,24 @@ async def delete_prodct_by_id_api(
 )
 async def update_product(
     product_id: int,
-    name: str = Form(...),
-    description: Optional[str] = Form(None),
-    category_id: int = Form(...),
-    price: Decimal = Form(...),
-    is_active: bool = Form(True),
-    stock_quantity: int = Form(0),
-    file: Optional[UploadFile] = File(None),
+    form_data_and_file: ProductFormData = Depends(ProductFormData.as_form),
     session: AsyncSession = Depends(get_prod_session),
     # _: UsersOrm = Depends(get_current_user)
 ):
-    image_path = await uploaderImg(file)
+    image_path = await uploaderImg(form_data_and_file.file)
+
+    data_dict = form_data_and_file.model_dump(exclude={"file"})
+    data_dict["image_path"] = image_path
+    
     updated = await ProductsService.update_product_by_id(
         session=session,
         product_id=product_id,
-        name=name,
-        description=description,
-        category_id=category_id,
-        price=price,
-        is_active=is_active,
-        stock_quantity=stock_quantity,
-        image_path=image_path
+        data = ProductData(**data_dict)
     )
     if not updated:
         raise HTTPException(status_code=404, detail="Product not found")
     return updated
+
 
 @product_router.get(
     "/products/{product_id}",

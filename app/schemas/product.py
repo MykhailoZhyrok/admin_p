@@ -1,8 +1,8 @@
 from datetime import datetime
+from fastapi import File, Form, UploadFile
 from pydantic import BaseModel, Field
 from decimal import Decimal
 from typing import Annotated, Optional
-
 
 
 class ProductBase(BaseModel):
@@ -31,3 +31,42 @@ class ProductResponse(ProductBase):
     updated_at: datetime
     class Config:
         orm_mode = True
+
+class ProductData(BaseModel):
+    name: str
+    category_id: int
+    price: Decimal
+    is_active: bool
+    stock_quantity: int
+    description: Optional[str] = None
+    image_path: Optional[str] = None
+
+class ProductFormData(BaseModel):
+    name: str
+    description: str | None
+    category_id: int
+    price: float
+    is_active: bool
+    stock_quantity: int
+    file: UploadFile
+
+    @classmethod
+    def as_form(
+        cls,
+        name: str = Form(...),
+        description: str | None = Form(None),
+        category_id: int = Form(...),
+        price: float = Form(...),
+        is_active: bool = Form(True),
+        stock_quantity: int = Form(0),
+        file: UploadFile = File(...)
+    ):
+        return cls(
+            name=name,
+            description=description,
+            category_id=category_id,
+            price=price,
+            is_active=is_active,
+            stock_quantity=stock_quantity,
+            file=file
+        )

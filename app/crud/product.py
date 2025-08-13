@@ -6,7 +6,7 @@ from sqlalchemy import Integer, and_, cast, func, insert, inspect, or_, select, 
 from sqlalchemy.orm import joinedload, selectinload
 from app.db.session import async_session_factory
 from app.models.product import ProductsOrm
-from app.schemas.product import ProductResponse
+from app.schemas.product import ProductData, ProductResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Annotated, Optional
 from decimal import Decimal
@@ -24,23 +24,9 @@ class ProductsService:
     @staticmethod
     async def insert_product(
             session: AsyncSession,
-            name: str,
-            category_id: int,
-            price: Decimal,
-            is_active: bool,
-            stock_quantity: int,
-            description: Optional[str] = None,
-            image_path: Optional[str] = None
+            data: ProductData,
         ) -> ProductResponse:
-        product = ProductsOrm(
-            name=name,
-            description=description,
-            category_id=category_id,
-            price=price,
-            is_active=is_active,
-            stock_quantity=stock_quantity,
-            image_path=image_path
-            )
+        product = ProductsOrm(**data.model_dump())
         session.add(product)
         await session.commit()
         await session.refresh(product)
@@ -66,41 +52,31 @@ class ProductsService:
     async def update_product_by_id(
         session: AsyncSession,
         product_id: int,
-        name: Optional[str] = None,
-        description: Optional[str] = None,
-        category_id: Optional[int] = None,
-        price: Optional[Decimal] = None,
-        is_active: Optional[bool] = None,
-        stock_quantity: Optional[int] = None,
-        image_path: Optional[str] = None
+        data: ProductData,
     ):
                 product = await session.get(ProductsOrm, product_id)
+
+                update_data = data.model_dump()
+
                 if not product:
                     return None
-                if name is not None:
-                    product.name = name
-                if description is not None:
-                    product.description = description
-                if category_id is not None:
-                        category = await session.get(CategoriesOrm, category_id)
-                        if not category:
-                            raise ValueError(f"Категорія з ID {category_id} не існує")
-                        product.category_id = category_id
-                if price is not None:
-                    product.price = price
-                if is_active is not None:
-                    product.is_active = is_active
-                if stock_quantity is not None:
-                    product.stock_quantity = stock_quantity
-                if image_path is not None:
-                    if product.image_path:
-                        file_path = Path("." + product.image_path)  
-                    if file_path.exists():
-                        try:
-                            file_path.unlink()
-                        except Exception as e:
-                            print(f"Не вдалося видалити файл {file_path}: {e}")
-                    product.image_path=image_path
+                
+                for field, value in update_data.items():
+                    if value is not None:
+                        if field == "category_id":
+                            category = await session.get(CategoriesOrm, data.category_id)
+                            if not category:
+                                raise ValueError(f"Категорія з ID {data.category_id} не існує")
+                        elif field == "image_path":
+                            if product.image_path:
+                                file_path = Path("." + product.image_path)  
+                                if file_path.exists():
+                                    try:
+                                        file_path.unlink()
+                                    except Exception as e:
+                                        print(f"Не вдалося видалити файл {file_path}: {e}")
+                        setattr(product, field, value)
+                        
                 await session.flush()
                 await session.commit()
                 await session.refresh(product) 
