@@ -3,7 +3,7 @@ from sqlalchemy.orm import DeclarativeBase
 
 from sqlalchemy.orm import DeclarativeBase
 
-class BaseOrder(DeclarativeBase): pass
+class BaseCart(DeclarativeBase): pass
 
 
 metadata_obj = MetaData()

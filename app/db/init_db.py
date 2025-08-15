@@ -1,5 +1,6 @@
 from app.models.product import ProductsOrm
 from app.models.user import UsersOrm
+from app.models.cart import CartOrm
 from app.db.session import async_engine_prod, async_engine_user
 
 async def create_tables_prod():

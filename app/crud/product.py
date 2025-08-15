@@ -1,17 +1,13 @@
-from typing import Dict, List, Optional
+from typing import Dict, Optional
 
 from pathlib import Path 
 from app.models.category import CategoriesOrm
-from sqlalchemy import Integer, and_, cast, func, insert, inspect, or_, select, text
+from sqlalchemy import select
 from sqlalchemy.orm import joinedload, selectinload
-from app.db.session import async_session_factory
 from app.models.product import ProductsOrm
 from app.schemas.product import ProductData, ProductResponse
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import Annotated, Optional
-from decimal import Decimal
-from pydantic import Field
-
+from typing import Optional
 
 class ProductsService:
 
