@@ -14,9 +14,11 @@ from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from jose import jwt, JWTError
 
 from app.schemas.user import CreateUserRequest, CurrentUser
+import os
+from dotenv import load_dotenv
 
-SECRET_KEY = "SECRET_KEY"
-ALGORITHM = 'HS256'
+SECRET_KEY = os.environ['POSTGRES_SECRET_KEY']
+ALGORITHM = os.environ['POSTGRES_ALGORITHM']
 
 bcrypt_context = CryptContext(schemes=['bcrypt'], deprecated="auto")
 oauth2bearer = OAuth2PasswordBearer(tokenUrl='/api/v1/user/token')

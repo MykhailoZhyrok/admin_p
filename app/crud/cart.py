@@ -24,7 +24,7 @@ class CartService:
     @staticmethod
     async def add_to_cart(session: AsyncSession, product_id: int, get_quantity: int, user_id: int | None = None, session_token: str | None = None)->CartResponse:
 
-        if get_quantity > 0:
+        if get_quantity <= 0:
             raise HTTPException(status_code=404, detail="Quantity can not be zero")
         
         product = await session.get(ProductsOrm, product_id)

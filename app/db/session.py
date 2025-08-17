@@ -1,10 +1,14 @@
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from sqlalchemy.orm import DeclarativeBase
-import os
-from typing import AsyncGenerator
 
-DATABASE_URL_PROD = "sqlite+aiosqlite:///products.db"
-DATABASE_URL_USER = "sqlite+aiosqlite:///user.db"
+from typing import AsyncGenerator
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+DATABASE_URL_PROD = f"postgresql+asyncpg://{os.environ['POSTGRES_USER']}:{os.environ['POSTGRES_PASSWORD']}@{os.environ['POSTGRES_HOST']}:{os.environ['POSTGRES_PORT']}/{os.environ['POSTGRES_DB_PRODUCTS']}"
+DATABASE_URL_USER = f"postgresql+asyncpg://{os.environ['POSTGRES_USER']}:{os.environ['POSTGRES_PASSWORD']}@{os.environ['POSTGRES_HOST']}:{os.environ['POSTGRES_PORT']}/{os.environ['POSTGRES_DB_USER']}"
+
 
 async_engine_prod = create_async_engine(
     url=DATABASE_URL_PROD,
